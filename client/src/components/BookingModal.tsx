@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Calendar as CalendarIcon, Car, Clock, CreditCard, Check } from "lucide-react";
+import { Calendar as CalendarIcon, Car, Clock, CreditCard, Check, MapPin } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import DiscountBadge, { DiscountType } from "./DiscountBadge";
+import ParkingSpots, { createMockParkingLevels, ParkingLevel } from "./ParkingSpots";
 
 interface Vehicle {
   id: string;
@@ -39,18 +40,21 @@ interface BookingModalProps {
   parkingName: string;
   pricePerHour: number;
   vehicles?: Vehicle[];
+  parkingLevels?: ParkingLevel[];
   onConfirm?: (booking: {
     date: Date;
     startTime: string;
     duration: number;
     vehicleId: string;
+    spotId?: string;
   }) => void;
 }
 
 const steps = [
   { id: 1, title: "Дата и время", icon: CalendarIcon },
-  { id: 2, title: "Автомобиль", icon: Car },
-  { id: 3, title: "Подтверждение", icon: Check },
+  { id: 2, title: "Место", icon: MapPin },
+  { id: 3, title: "Автомобиль", icon: Car },
+  { id: 4, title: "Подтверждение", icon: Check },
 ];
 
 const timeSlots = [
@@ -78,12 +82,14 @@ export default function BookingModal({
   parkingName,
   pricePerHour,
   vehicles = mockVehicles,
+  parkingLevels = createMockParkingLevels(3),
   onConfirm,
 }: BookingModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDuration, setSelectedDuration] = useState<number>(2);
+  const [selectedSpot, setSelectedSpot] = useState<string>("");
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
 
   const totalDiscount = mockDiscounts.reduce((sum, d) => sum + d.percent, 0);
@@ -93,7 +99,7 @@ export default function BookingModal({
   const finalCost = baseCost - discountAmount;
 
   const handleNext = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
       onConfirm?.({
@@ -101,6 +107,7 @@ export default function BookingModal({
         startTime: selectedTime,
         duration: selectedDuration,
         vehicleId: selectedVehicle,
+        spotId: selectedSpot,
       });
       onClose();
     }
@@ -114,13 +121,21 @@ export default function BookingModal({
 
   const canProceed = () => {
     if (currentStep === 1) return selectedDate && selectedTime && selectedDuration;
-    if (currentStep === 2) return selectedVehicle;
+    if (currentStep === 2) return selectedSpot;
+    if (currentStep === 3) return selectedVehicle;
     return true;
+  };
+
+  const selectedSpotDisplay = () => {
+    if (!selectedSpot) return null;
+    const allSpots = parkingLevels.flatMap((level) => level.spots);
+    const spot = allSpots.find((s) => s.id === selectedSpot);
+    return spot ? `${spot.row}${spot.number}` : null;
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Бронирование</DialogTitle>
           <DialogDescription>{parkingName}</DialogDescription>
@@ -143,7 +158,7 @@ export default function BookingModal({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "h-0.5 w-12 sm:w-20 mx-1",
+                      "h-0.5 w-8 sm:w-12 mx-0.5",
                       currentStep > step.id ? "bg-primary" : "bg-muted"
                     )}
                   />
@@ -151,10 +166,10 @@ export default function BookingModal({
               </div>
             ))}
           </div>
-          <Progress value={(currentStep / 3) * 100} className="h-1" />
+          <Progress value={(currentStep / 4) * 100} className="h-1" />
         </div>
 
-        <div className="min-h-[280px]">
+        <div className="min-h-[320px]">
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
@@ -224,6 +239,16 @@ export default function BookingModal({
           )}
 
           {currentStep === 2 && (
+            <div className="overflow-y-auto max-h-[400px]">
+              <ParkingSpots
+                levels={parkingLevels}
+                selectedSpotId={selectedSpot}
+                onSelectSpot={setSelectedSpot}
+              />
+            </div>
+          )}
+
+          {currentStep === 3 && (
             <div className="space-y-4">
               <label className="text-sm font-medium mb-2 block">Выберите автомобиль</label>
               <div className="space-y-2">
@@ -252,7 +277,7 @@ export default function BookingModal({
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <div className="space-y-4">
               <div className="p-4 bg-muted/50 rounded-lg space-y-3">
                 <div className="flex justify-between">
@@ -272,6 +297,12 @@ export default function BookingModal({
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Длительность:</span>
                   <span className="font-medium">{selectedDuration} ч.</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Место:</span>
+                  <span className="font-mono font-bold text-primary" data-testid="text-spot-display">
+                    {selectedSpotDisplay()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Автомобиль:</span>
@@ -322,7 +353,7 @@ export default function BookingModal({
             className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600"
             data-testid="button-booking-next"
           >
-            {currentStep === 3 ? "Подтвердить" : "Далее"}
+            {currentStep === 4 ? "Подтвердить" : "Далее"}
           </Button>
         </div>
       </DialogContent>
