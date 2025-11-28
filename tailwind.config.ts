@@ -81,6 +81,11 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        parking: {
+          available: "hsl(var(--parking-available) / <alpha-value>)",
+          occupied: "hsl(var(--parking-occupied) / <alpha-value>)",
+          reserved: "hsl(var(--parking-reserved) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

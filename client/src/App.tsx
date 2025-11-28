@@ -4,19 +4,19 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import UserLayout from "@/layouts/UserLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
+      <Route path="/admin/*" component={AdminLayout} />
+      <Route component={UserLayout} />
     </Switch>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -26,5 +26,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;
