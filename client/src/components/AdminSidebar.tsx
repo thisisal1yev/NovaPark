@@ -116,7 +116,7 @@ export default function AdminSidebar({
           )}
         </Button>
 
-        <div className="flex items-center justify-center">
+        <div className="flex items-center">
           <ThemeToggle />
         </div>
       </div>

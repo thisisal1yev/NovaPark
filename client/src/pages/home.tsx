@@ -87,9 +87,11 @@ export default function HomePage() {
   const [onlyAvailable, setOnlyAvailable] = useState(true);
 
   const filteredParkings = mockParkings.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesPrice = p.pricePerHour >= priceRange[0] && p.pricePerHour <= priceRange[1];
+    const matchesPrice =
+      p.pricePerHour >= priceRange[0] && p.pricePerHour <= priceRange[1];
     const matchesCharging = !onlyWithCharging || p.hasCharging;
     const matchesAvailable = !onlyAvailable || p.availableSpots > 0;
     return matchesSearch && matchesPrice && matchesCharging && matchesAvailable;
@@ -107,7 +109,7 @@ export default function HomePage() {
       <div className="p-4 border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto">
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
+            <div className="relative w-full flex items-center justify-between">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Поиск парковок..."
@@ -120,18 +122,22 @@ export default function HomePage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                  className="!absolute right-1 h-7 w-7"
                   onClick={() => setSearchQuery("")}
                 >
                   <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
-            
+
             <div className="flex gap-2">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="gap-2" data-testid="button-filters">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    data-testid="button-filters"
+                  >
                     <SlidersHorizontal className="h-4 w-4" />
                     <span className="hidden sm:inline">Фильтры</span>
                     {activeFiltersCount > 0 && (
@@ -142,11 +148,16 @@ export default function HomePage() {
                 <SheetContent>
                   <SheetHeader>
                     <SheetTitle>Фильтры</SheetTitle>
-                    <SheetDescription>Настройте параметры поиска парковок</SheetDescription>
+                    <SheetDescription>
+                      Настройте параметры поиска парковок
+                    </SheetDescription>
                   </SheetHeader>
                   <div className="space-y-6 mt-6">
                     <div className="space-y-4">
-                      <Label>Цена за час: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} сум</Label>
+                      <Label>
+                        Цена за час: {priceRange[0].toLocaleString()} -{" "}
+                        {priceRange[1].toLocaleString()} сум
+                      </Label>
                       <Slider
                         value={priceRange}
                         onValueChange={setPriceRange}
@@ -156,7 +167,7 @@ export default function HomePage() {
                         data-testid="slider-price"
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <Label htmlFor="charging">Только с зарядкой EV</Label>
                       <Switch
@@ -166,9 +177,11 @@ export default function HomePage() {
                         data-testid="switch-charging"
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="available">Только со свободными местами</Label>
+                      <Label htmlFor="available">
+                        Только со свободными местами
+                      </Label>
                       <Switch
                         id="available"
                         checked={onlyAvailable}
@@ -200,19 +213,23 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
             <span>Найдено: {filteredParkings.length} парковок</span>
             <span className="text-muted">•</span>
             <span className="text-parking-available flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-parking-available" />
-              {filteredParkings.reduce((sum, p) => sum + p.availableSpots, 0)} свободных мест
+              {filteredParkings.reduce(
+                (sum, p) => sum + p.availableSpots,
+                0
+              )}{" "}
+              свободных мест
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden z-0">
         {viewMode === "map" ? (
           <ParkingMap
             parkings={filteredParkings}
@@ -242,7 +259,9 @@ export default function HomePage() {
                 <div className="text-center py-12 text-muted-foreground">
                   <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium">Парковки не найдены</p>
-                  <p className="text-sm">Попробуйте изменить фильтры или поисковый запрос</p>
+                  <p className="text-sm">
+                    Попробуйте изменить фильтры или поисковый запрос
+                  </p>
                 </div>
               )}
             </div>

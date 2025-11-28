@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Camera, Grid, List, RefreshCw, Settings } from "lucide-react";
+import { Camera, Grid, List, RefreshCw, Settings, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +42,7 @@ const detectionLogs: DetectionLog[] = [
 
 export default function AdminCameras() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedCamera, setSelectedCamera] = useState<typeof cameras[0] | null>(null);
 
   const getStatusBadge = (status: DetectionLog["status"]) => {
     switch (status) {
@@ -129,18 +130,55 @@ export default function AdminCameras() {
         </TabsList>
 
         <TabsContent value="cameras">
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
-            {cameras.map((camera) => (
-              <CameraPanel
-                key={camera.id}
-                cameraId={camera.id}
-                cameraName={camera.name}
-                isLive={camera.isLive}
-                onManualEntry={() => console.log("Manual entry for:", camera.id)}
-                onBlockVehicle={(plate) => console.log("Block:", plate)}
-              />
-            ))}
-          </div>
+          {/* If a camera is selected, show focused camera view */}
+          {selectedCamera ? (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedCamera(null)}>
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="ml-2">Назад</span>
+                  </Button>
+                  <div>
+                    <h2 className="text-lg font-semibold">{selectedCamera.name}</h2>
+                    <p className="text-sm text-muted-foreground">{selectedCamera.location}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <CameraPanel
+                  key={selectedCamera.id}
+                  cameraId={selectedCamera.id}
+                  cameraName={selectedCamera.name}
+                  isLive={selectedCamera.isLive}
+                  onManualEntry={() => console.log("Manual entry for:", selectedCamera.id)}
+                  onBlockVehicle={(plate) => console.log("Block:", plate)}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
+              {cameras.map((camera) => (
+                <div
+                  key={camera.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedCamera(camera)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedCamera(camera); }}
+                  className="cursor-pointer"
+                >
+                  <CameraPanel
+                    cameraId={camera.id}
+                    cameraName={camera.name}
+                    isLive={camera.isLive}
+                    onManualEntry={() => console.log("Manual entry for:", camera.id)}
+                    onBlockVehicle={(plate) => console.log("Block:", plate)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="logs">
