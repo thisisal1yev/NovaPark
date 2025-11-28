@@ -45,7 +45,7 @@ export default function Header({
               <Car className="h-5 w-5 text-white" />
             </div>
             <span className="hidden font-semibold text-lg sm:inline-block">
-              Smart Parking Pro
+              NovaPark
             </span>
           </Link>
 
